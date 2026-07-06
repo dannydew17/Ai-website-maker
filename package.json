@@ -11,6 +11,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "seed": "tsx scripts/seed-test-lead.ts",
+    "discover": "tsx scripts/run-discovery.ts",
     "worker:batch": "tsx packages/worker/src/runBatch.ts",
     "dashboard:dev": "npm run dev -w apps/dashboard"
   },
