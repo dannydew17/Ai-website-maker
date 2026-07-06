@@ -1,0 +1,13 @@
+{
+  "name": "@ai-website-maker/qualification",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "@ai-website-maker/core": "*",
+    "@prisma/client": "^6.1.0",
+    "playwright": "^1.49.1"
+  }
+}
