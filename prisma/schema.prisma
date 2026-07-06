@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum LeadStage {
+  DISCOVERED
+  QUALIFYING
+  QUALIFIED
+  DISQUALIFIED
+  HARVESTING
+  HARVESTED
+  GENERATING
+  GENERATED
+  DEPLOYING
+  DEPLOYED
+  DRAFTING_EMAIL
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  SENT
+  FAILED
+}
+
+model Lead {
+  id              String   @id @default(cuid())
+  osmId           String   @unique
+  osmType         String
+  name            String
+  category        String
+  addressLine     String?
+  city            String?
+  postcode        String?
+  latitude        Float?
+  longitude       Float?
+  phone           String?
+  openingHours    String?
+  existingWebsite String?
+  hasWebsite      Boolean  @default(false)
+
+  stage         LeadStage  @default(DISCOVERED)
+  lastError     String?
+  failedAtStage LeadStage?
+  retryCount    Int        @default(0)
+
+  qualification  Qualification?
+  scrapedContent ScrapedContent?
+  generatedSite  GeneratedSite?
+  emailDrafts    EmailDraft[]
+  emailLogs      EmailLog[]
+  stageEvents    StageEvent[]
+
+  discoveredAt DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([stage])
+  @@index([category, city])
+}
+
+model Qualification {
+  id             String   @id @default(cuid())
+  lead           Lead     @relation(fields: [leadId], references: [id])
+  leadId         String   @unique
+  reason         String // "NO_WEBSITE" | "UNDERDEVELOPED_WEBSITE" | "SITE_UNREACHABLE" | "DISQUALIFIED_ADEQUATE_SITE"
+  score          Int?
+  scoreBreakdown Json?
+  scoredAt       DateTime @default(now())
+}
+
+model ScrapedContent {
+  id            String   @id @default(cuid())
+  lead          Lead     @relation(fields: [leadId], references: [id])
+  leadId        String   @unique
+  sourceUrl     String?
+  aboutText     String?
+  services      Json?
+  photos        Json?
+  testimonials  Json?
+  contactEmail  String?
+  robotsAllowed Boolean  @default(true)
+  scrapedAt     DateTime @default(now())
+}
+
+model GeneratedSite {
+  id                 String    @id @default(cuid())
+  lead               Lead      @relation(fields: [leadId], references: [id])
+  leadId             String    @unique
+  contentJson        Json
+  buildOutputPath    String
+  deployUrl          String?
+  vercelDeploymentId String?
+  generatedAt        DateTime  @default(now())
+  deployedAt         DateTime?
+}
+
+model EmailDraft {
+  id             String   @id @default(cuid())
+  lead           Lead     @relation(fields: [leadId], references: [id])
+  leadId         String
+  subject        String
+  bodyHtml       String
+  bodyText       String
+  recipientEmail String
+  editedByHuman  Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  @@index([leadId, createdAt])
+}
+
+model EmailLog {
+  id                String   @id @default(cuid())
+  lead              Lead     @relation(fields: [leadId], references: [id])
+  leadId            String
+  emailDraftId      String?
+  recipientEmail    String
+  provider          String // "sendgrid" | "smtp" | "dry_run"
+  providerMessageId String?
+  status            String // "sent" | "bounced" | "failed" | "dry_run"
+  sentAt            DateTime @default(now())
+}
+
+model SuppressionEntry {
+  id      String   @id @default(cuid())
+  email   String?  @unique
+  domain  String?
+  reason  String // "unsubscribed" | "bounced" | "manual_do_not_contact" | "complained"
+  addedAt DateTime @default(now())
+
+  @@index([domain])
+}
+
+model StageEvent {
+  id        String     @id @default(cuid())
+  lead      Lead       @relation(fields: [leadId], references: [id])
+  leadId    String
+  fromStage LeadStage?
+  toStage   LeadStage
+  note      String?
+  createdAt DateTime   @default(now())
+
+  @@index([leadId, createdAt])
+}
