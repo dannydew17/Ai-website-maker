@@ -18,7 +18,7 @@ Then visit `http://localhost:8000`.
 Search for `placeholder` and the sample contact info to find everything that needs a real value:
 
 - Phone: `(302) 555-0100` (in `index.html`, `services.html`, `about.html`, `contact.html`, footers on all pages)
-- Email: `info@coastalvalet.example` (same files)
+- Email: temporarily set to `dannydewing@icloud.com` (Danny's personal email) so the site is usable now — swap for a real Coastal Valet business email before publishing
 - Address: `Rehoboth Beach, DE 19971` (same files)
 - Hours table in `contact.html`
 - Service area list in `index.html` (`Rehoboth Beach`, `Dewey Beach`, `Lewes`, `Bethany Beach`, `Milton & Nearby`) — adjust to match where Coastal Valet actually operates
